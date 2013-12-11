@@ -23,8 +23,8 @@ import java.util.Arrays;
 
 import org.mrpdaemon.sec.encfs.EncFSFileProvider;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.UserRecoverableAuthException;
+//import com.google.android.gms.auth.GoogleAuthException;
+//import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.json.gson.GsonFactory;
@@ -131,7 +131,7 @@ public class GoogleDriveAccount extends Account {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				try {
+				/*try {
 					credential.getToken();
 
 					// Do an about request to test if the API works
@@ -159,6 +159,7 @@ public class GoogleDriveAccount extends Account {
 				} finally {
 					authInProgress = false;
 				}
+			}*/
 			}
 		});
 

@@ -19,12 +19,20 @@
 package org.mrpdaemon.android.encdroid;
 
 import java.io.IOException;
+import java.io.File;
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.mrpdaemon.sec.encfs.EncFSConfig;
 import org.mrpdaemon.sec.encfs.EncFSConfigFactory;
+import org.mrpdaemon.sec.encfs.EncFSConfigParser;
 import org.mrpdaemon.sec.encfs.EncFSFileProvider;
+import org.mrpdaemon.sec.encfs.EncFSInvalidConfigException;
 import org.mrpdaemon.sec.encfs.EncFSInvalidPasswordException;
+import org.mrpdaemon.sec.encfs.EncFSUnsupportedException;
 import org.mrpdaemon.sec.encfs.EncFSVolume;
 import org.mrpdaemon.sec.encfs.EncFSVolumeBuilder;
+import org.xml.sax.SAXException;
+
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -893,15 +901,35 @@ public class VolumeListActivity extends ListActivity {
 			}
 
 			// Get file provider for this file system
-			EncFSFileProvider fileProvider = mFileSystem
-					.getFileProvider(args[0]);
-
+                        EncFSFileProvider fileProvider = mFileSystem
+                            .getFileProvider(args[0]);
+                        File config = new File("/storage/emulated/0/Encfs/.encfs6.xml");
+                        EncFSConfig volConfig = null;
+                        try {
+                            volConfig = EncFSConfigParser.parseFile(config );
+                        } catch (EncFSInvalidConfigException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (EncFSUnsupportedException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (ParserConfigurationException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (SAXException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (IOException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
 			// Unlock the volume, takes long due to PBKDF2 calculation
 			try {
 				if (cachedKey == null) {
 					volume = new EncFSVolumeBuilder()
 							.withFileProvider(fileProvider)
-							.withPbkdf2Provider(mApp.getNativePBKDF2Provider())
+							//.withPbkdf2Provider(mApp.getNativePBKDF2Provider())
+                                                        .withConfig(volConfig)
 							.withPassword(args[1]).buildVolume();
 				} else {
 					volume = new EncFSVolumeBuilder()
