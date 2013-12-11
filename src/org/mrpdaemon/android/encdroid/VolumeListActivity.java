@@ -923,6 +923,7 @@ public class VolumeListActivity extends ListActivity {
                             // TODO Auto-generated catch block
                             e1.printStackTrace();
                         }
+                        //test
 			// Unlock the volume, takes long due to PBKDF2 calculation
 			try {
 				if (cachedKey == null) {
