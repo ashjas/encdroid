@@ -78,6 +78,8 @@ public class FileChooserActivity extends ListActivity {
 
 	// Result key for the path returned by this activity
 	public final static String RESULT_KEY = "result_path";
+	
+        public final static String CONFIG_RESULT_KEY = "config_result_path";
 
 	// Name of the SD card directory for copying files into
 	public final static String ENCDROID_SD_DIR_NAME = "Encdroid";
@@ -90,6 +92,8 @@ public class FileChooserActivity extends ListActivity {
 
 	// Dialog ID's
 	private final static int DIALOG_AUTO_IMPORT = 0;
+	
+        private final static int DIALOG_BROWSE_CONFIG= 1;
 
 	// Adapter for the list
 	private FileChooserAdapter mAdapter = null;
@@ -99,9 +103,13 @@ public class FileChooserActivity extends ListActivity {
 
 	// What mode we're running in
 	private int mMode;
+	
+        private Boolean chooseConfigNext=false;
 
 	// Current directory
 	private String mCurrentDir;
+	
+        private String volumeHomeDir;
 
 	// The underlying FS this chooser
 	private FileSystem mFileSystem;
@@ -267,6 +275,29 @@ public class FileChooserActivity extends ListActivity {
 					});
 			alertDialog = alertBuilder.create();
 			break;
+		case DIALOG_BROWSE_CONFIG: 
+			alertBuilder.setTitle(String
+					.format(getString(R.string.browse_config_dialog_str),
+							mCurrentDir));
+			alertBuilder.setPositiveButton(getString(R.string.btn_ok_str),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
+                                                    //launch another filechooser activity for browsing config file.
+                                                    chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
+							//returnResult(mCurrentDir);
+						}
+					});
+			// Cancel button
+			alertBuilder.setNegativeButton(getString(R.string.btn_cancel_str),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
+							dialog.cancel();
+						}
+					});
+			alertDialog = alertBuilder.create();
+                        break;
 		default:
 			Log.d(TAG, "Unknown dialog ID requested " + id);
 			return null;
@@ -503,6 +534,11 @@ public class FileChooserActivity extends ListActivity {
 					showDialog(DIALOG_AUTO_IMPORT);
 				}
 			}
+                        else// configFileNotfound so if ok pressed in this activity, showdialog to browse for config file.
+                        {
+                           volumeHomeDir=mCurrentDir;
+                           showDialog(DIALOG_BROWSE_CONFIG);
+                        }
 		}
 	}
 
@@ -526,11 +562,23 @@ public class FileChooserActivity extends ListActivity {
 			mCurrentDir = selected.getPath();
 			launchFillTask();
 		} else {
-			if (mMode == VOLUME_PICKER_MODE) {
-				returnResult(mCurrentDir);
-			} else if (mMode == FILE_PICKER_MODE) {
-				returnResult(selected.getPath());
-			}
+                        if(!chooseConfigNext)
+                        {
+                            if (mMode == VOLUME_PICKER_MODE) {
+                                returnResult(mCurrentDir);
+                            } else if (mMode == FILE_PICKER_MODE) {
+                                returnResult(selected.getPath());
+                            }
+                        }
+                        else
+                        {
+                            Intent intent = this.getIntent();
+                            intent.putExtra(RESULT_KEY, volumeHomeDir);
+                            intent.putExtra(CONFIG_RESULT_KEY, selected.getPath());
+                            setResult(Activity.RESULT_OK, intent);
+                            finish();
+
+                        }
 		}
 	}
 
