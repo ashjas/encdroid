@@ -925,7 +925,7 @@ public class VolumeListActivity extends ListActivity {
                         EncFSFileProvider fileProvider = mFileSystem
                             .getFileProvider(args[0]);
                         EncFSConfig volConfig = null;
-                        if(args.length()>2)
+                        if(args.length>2)
                         {
                             File config = new File(args[2]);
                             try {
@@ -952,7 +952,7 @@ public class VolumeListActivity extends ListActivity {
 			// Unlock the volume, takes long due to PBKDF2 calculation
 			try {
 				if (cachedKey == null) {
-                                        if(volConfig) {
+                                        if(volConfig != null) {
 					volume = new EncFSVolumeBuilder()
 							.withFileProvider(fileProvider)
                                                         .withConfig(volConfig)
