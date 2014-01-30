@@ -229,6 +229,10 @@ public class FileChooserActivity extends ListActivity {
 			item = menu.findItem(R.id.file_chooser_menu_refresh);
 			item.setVisible(false);
 		}
+                else if (mMode == VOLUME_PICKER_MODE){
+                        MenuItem item = menu.findItem(R.id.file_chooser_menu_import);
+                        item.setVisible(true);
+                    }
 
 		return super.onCreateOptionsMenu(menu);
 	}
