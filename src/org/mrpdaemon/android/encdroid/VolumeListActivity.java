@@ -483,13 +483,13 @@ public class VolumeListActivity extends ListActivity {
 										mVolumeFileSystem, null);
 								mAsyncTaskId = ASYNC_TASK_UNLOCK_PBKDF2;
 								mAsyncTask.setActivity(VolumeListActivity.this);
-                                                                if(mSelectedVolume.getCustomConfigPath() == null)
+                                if(mSelectedVolume.getCustomConfigPath() == null)
 								    mAsyncTask.execute(mSelectedVolume.getPath(),
 								        		value.toString());
-                                                                else
+                                else
 								    mAsyncTask.execute(mSelectedVolume.getPath(),
 								        		value.toString(),
-                                                                                        mSelectedVolume.getCustomConfigPath());
+                                                mSelectedVolume.getCustomConfigPath());
 								break;
 							case DIALOG_VOL_CREATEPASS:
 								// Show progress dialog
@@ -499,10 +499,10 @@ public class VolumeListActivity extends ListActivity {
 								// Launch async task to create volume
 								mAsyncTask = new CreateVolumeTask(mProgDialog,
 										mVolumeFileSystem);
-								mAsyncTaskId = ASYNC_TASK_CREATE;
-								mAsyncTask.setActivity(VolumeListActivity.this);
-								mAsyncTask.execute(mVolPickerResult,
-										mCreateVolumeName, value.toString());
+                                mAsyncTaskId = ASYNC_TASK_CREATE;
+                                mAsyncTask.setActivity(VolumeListActivity.this);
+                                mAsyncTask.execute(mVolPickerResult,
+                                        mCreateVolumeName, value.toString());
 								break;
 							}
 						}
@@ -547,10 +547,10 @@ public class VolumeListActivity extends ListActivity {
 							Editable value = input.getText();
 							switch (myId) {
 							case DIALOG_VOL_NAME:
-                                                                if(mVolConfigResult != null)
+                                if(mVolConfigResult == null)
 								importVolume(value.toString(),
 										mVolPickerResult, mVolumeFileSystem);
-                                                                else
+                                else
 								importVolumeWithConfig(value.toString(),
 										mVolPickerResult,mVolConfigResult, mVolumeFileSystem);
 								break;
@@ -924,10 +924,11 @@ public class VolumeListActivity extends ListActivity {
 			// Get file provider for this file system
                         EncFSFileProvider fileProvider = mFileSystem
                             .getFileProvider(args[0]);
+                        String providerPrefix=mFileSystem.getPathPrefix();
                         EncFSConfig volConfig = null;
                         if(args.length>2)
                         {
-                            File config = new File(args[2]);
+                            File config = new File(providerPrefix + args[2]);
                             try {
                                 volConfig = EncFSConfigParser.parseFile(config );
                             } catch (EncFSInvalidConfigException e1) {
@@ -955,7 +956,7 @@ public class VolumeListActivity extends ListActivity {
                                         if(volConfig != null) {
 					volume = new EncFSVolumeBuilder()
 							.withFileProvider(fileProvider)
-                                                        .withConfig(volConfig)
+                            .withConfig(volConfig)
 							.withPassword(args[1]).buildVolume();
 				}
                                 else {
