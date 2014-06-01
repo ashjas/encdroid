@@ -839,7 +839,11 @@ public class VolumeListActivity extends ListActivity {
 					cachedKey);
 			mAsyncTaskId = ASYNC_TASK_UNLOCK_CACHE;
 			mAsyncTask.setActivity(VolumeListActivity.this);
-			mAsyncTask.execute(mSelectedVolume.getPath(), null);
+			if(mSelectedVolume.getCustomConfigPath() == null)
+				mAsyncTask.execute(mSelectedVolume.getPath(),null);
+			else
+				mAsyncTask.execute(mSelectedVolume.getPath(),null,
+				mSelectedVolume.getCustomConfigPath());
 		}
 	}
 
@@ -953,24 +957,29 @@ public class VolumeListActivity extends ListActivity {
 			// Unlock the volume, takes long due to PBKDF2 calculation
 			try {
 				if (cachedKey == null) {
-                                        if(volConfig != null) {
+					if(volConfig != null) {
 					volume = new EncFSVolumeBuilder()
 							.withFileProvider(fileProvider)
-                            .withConfig(volConfig)
+							.withConfig(volConfig)
 							.withPassword(args[1]).buildVolume();
-				}
-                                else {
+				    } else {
 					volume = new EncFSVolumeBuilder()
 							.withFileProvider(fileProvider)
 							.withPbkdf2Provider(mApp.getNativePBKDF2Provider())
 							.withPassword(args[1]).buildVolume();
-                                }
-
-                                }else {
-                                    volume = new EncFSVolumeBuilder()
-                                        .withFileProvider(fileProvider)
-                                        .withDerivedKeyData(cachedKey).buildVolume();
-                                }
+					}
+					} else {
+						if(volConfig != null) {
+							volume = new EncFSVolumeBuilder()
+								.withFileProvider(fileProvider)
+								.withConfig(volConfig)
+								.withDerivedKeyData(cachedKey).buildVolume();
+							} else {
+								volume = new EncFSVolumeBuilder()
+									.withFileProvider(fileProvider)
+									.withDerivedKeyData(cachedKey).buildVolume();
+							}
+						}
 			} catch (EncFSInvalidPasswordException e) {
 				if (cachedKey != null) {
 					invalidCachedKey = true;
