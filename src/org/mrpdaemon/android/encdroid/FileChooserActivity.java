@@ -288,7 +288,7 @@ public class FileChooserActivity extends ListActivity {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
                                                     //launch another filechooser activity for browsing config file.
-                                                    chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
+                                                    //chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
 							//returnResult(mCurrentDir);
 						}
 					});
@@ -320,6 +320,11 @@ public class FileChooserActivity extends ListActivity {
 		case R.id.file_chooser_menu_refresh:
 			launchFillTask();
 			return true;
+		case R.id.file_chooser_menu_import:
+			//ashish
+			chooseConfigNext=true;
+			volumeHomeDir=mCurrentDir;
+			showDialog(DIALOG_BROWSE_CONFIG);
 		case android.R.id.home:
 			Log.v(TAG, "Home icon clicked");
 			if (!mCurrentDir.equalsIgnoreCase(mFileProvider
@@ -534,14 +539,14 @@ public class FileChooserActivity extends ListActivity {
 			}
 
 			if (result == true) {
-				if (mPrefs.getBoolean("auto_import", true)) {
+				if (mPrefs.getBoolean("auto_import", true) && !chooseConfigNext) {
 					showDialog(DIALOG_AUTO_IMPORT);
 				}
 			}
                         else// configFileNotfound so if ok pressed in this activity, showdialog to browse for config file.
                         {
-                           volumeHomeDir=mCurrentDir;
-                           showDialog(DIALOG_BROWSE_CONFIG);
+                           //volumeHomeDir=mCurrentDir;
+                           //showDialog(DIALOG_BROWSE_CONFIG);
                         }
 		}
 	}
