@@ -54,6 +54,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FileChooserActivity extends ListActivity {
 	// Parameter key for activity mode
@@ -104,7 +105,8 @@ public class FileChooserActivity extends ListActivity {
 	// What mode we're running in
 	private int mMode;
 	
-        private Boolean chooseConfigNext=false;
+	private Boolean chooseConfigNext=false;
+	boolean configFileFound = false;
 
 	// Current directory
 	private String mCurrentDir;
@@ -229,10 +231,12 @@ public class FileChooserActivity extends ListActivity {
 			item = menu.findItem(R.id.file_chooser_menu_refresh);
 			item.setVisible(false);
 		}
-                else if (mMode == VOLUME_PICKER_MODE){
-                        MenuItem item = menu.findItem(R.id.file_chooser_menu_import);
-                        item.setVisible(true);
-                    }
+		MenuItem item = menu.findItem(R.id.file_chooser_menu_import);
+		if (mMode == VOLUME_PICKER_MODE )
+			item.setVisible(true);
+		else
+			item.setVisible(false);
+
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -287,8 +291,12 @@ public class FileChooserActivity extends ListActivity {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
-                                                    //launch another filechooser activity for browsing config file.
-                                                    //chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
+							//launch another filechooser activity for browsing config file.
+							chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
+							Toast.makeText(getApplicationContext(),
+									String.format(getString(R.string.browse_config_toast_str),
+									mCurrentDir),
+									Toast.LENGTH_LONG).show();
 							//returnResult(mCurrentDir);
 						}
 					});
@@ -298,6 +306,7 @@ public class FileChooserActivity extends ListActivity {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
 							dialog.cancel();
+							finish();
 						}
 					});
 			alertDialog = alertBuilder.create();
@@ -322,9 +331,14 @@ public class FileChooserActivity extends ListActivity {
 			return true;
 		case R.id.file_chooser_menu_import:
 			//ashish
-			chooseConfigNext=true;
+			//chooseConfigNext=true;
 			volumeHomeDir=mCurrentDir;
-			showDialog(DIALOG_BROWSE_CONFIG);
+			if(configFileFound)
+				returnResult(mCurrentDir);
+			else
+				showDialog(DIALOG_BROWSE_CONFIG);
+			item.setVisible(false);
+			return true;
 		case android.R.id.home:
 			Log.v(TAG, "Home icon clicked");
 			if (!mCurrentDir.equalsIgnoreCase(mFileProvider
@@ -383,7 +397,7 @@ public class FileChooserActivity extends ListActivity {
 
 	private boolean fill() {
 
-		boolean configFileFound = false;
+		configFileFound=false;
 		List<EncFSFileInfo> childFiles = new ArrayList<EncFSFileInfo>();
 
 		try {
@@ -543,11 +557,11 @@ public class FileChooserActivity extends ListActivity {
 					showDialog(DIALOG_AUTO_IMPORT);
 				}
 			}
-                        else// configFileNotfound so if ok pressed in this activity, showdialog to browse for config file.
-                        {
-                           //volumeHomeDir=mCurrentDir;
-                           //showDialog(DIALOG_BROWSE_CONFIG);
-                        }
+			else// configFileNotfound so if ok pressed in this activity, showdialog to browse for config file.
+			{
+			   //volumeHomeDir=mCurrentDir;
+			   //showDialog(DIALOG_BROWSE_CONFIG);
+			}
 		}
 	}
 
