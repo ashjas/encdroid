@@ -284,7 +284,8 @@ public class FileChooserActivity extends ListActivity {
 			alertDialog = alertBuilder.create();
 			break;
 		case DIALOG_BROWSE_CONFIG: 
-			alertBuilder.setTitle(String
+			alertBuilder.setTitle(R.string.custom_import_str);
+			alertBuilder.setMessage(String
 					.format(getString(R.string.browse_config_dialog_str),
 							mCurrentDir));
 			alertBuilder.setPositiveButton(getString(R.string.btn_ok_str),
@@ -310,6 +311,12 @@ public class FileChooserActivity extends ListActivity {
 						}
 					});
 			alertDialog = alertBuilder.create();
+			alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialogInterface) {
+					finish();
+				}
+			});
                         break;
 		default:
 			Log.d(TAG, "Unknown dialog ID requested " + id);
