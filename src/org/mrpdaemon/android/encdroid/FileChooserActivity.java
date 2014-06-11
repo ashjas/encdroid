@@ -80,7 +80,7 @@ public class FileChooserActivity extends ListActivity {
 	// Result key for the path returned by this activity
 	public final static String RESULT_KEY = "result_path";
 	
-        public final static String CONFIG_RESULT_KEY = "config_result_path";
+	public final static String CONFIG_RESULT_KEY = "config_result_path";
 
 	// Name of the SD card directory for copying files into
 	public final static String ENCDROID_SD_DIR_NAME = "Encdroid";
@@ -94,7 +94,7 @@ public class FileChooserActivity extends ListActivity {
 	// Dialog ID's
 	private final static int DIALOG_AUTO_IMPORT = 0;
 	
-        private final static int DIALOG_BROWSE_CONFIG= 1;
+	private final static int DIALOG_BROWSE_CONFIG= 1;
 
 	// Adapter for the list
 	private FileChooserAdapter mAdapter = null;
@@ -592,23 +592,23 @@ public class FileChooserActivity extends ListActivity {
 			mCurrentDir = selected.getPath();
 			launchFillTask();
 		} else {
-                        if(!chooseConfigNext)
-                        {
-                            if (mMode == VOLUME_PICKER_MODE) {
-                                returnResult(mCurrentDir);
-                            } else if (mMode == FILE_PICKER_MODE) {
-                                returnResult(selected.getPath());
-                            }
-                        }
-                        else
-                        {
-                            Intent intent = this.getIntent();
-                            intent.putExtra(RESULT_KEY, volumeHomeDir);
-                            intent.putExtra(CONFIG_RESULT_KEY, selected.getPath());
-                            setResult(Activity.RESULT_OK, intent);
-                            finish();
+				if(!chooseConfigNext)
+				{
+					if (mMode == VOLUME_PICKER_MODE) {
+						returnResult(mCurrentDir);
+					} else if (mMode == FILE_PICKER_MODE) {
+						returnResult(selected.getPath());
+					}
+				}
+				else
+				{
+					Intent intent = this.getIntent();
+					intent.putExtra(RESULT_KEY, volumeHomeDir);
+					intent.putExtra(CONFIG_RESULT_KEY, selected.getPath());
+					setResult(Activity.RESULT_OK, intent);
+					finish();
 
-                        }
+				}
 		}
 	}
 

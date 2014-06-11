@@ -136,8 +136,8 @@ public class VolumeListActivity extends ListActivity {
 
 	// Result from the volume picker activity
 	private String mVolPickerResult = null;
-	
-        private String mVolConfigResult = null;
+
+		private String mVolConfigResult = null;
 
 	// Text for the error dialog
 	private String mErrDialogText = "";
@@ -483,13 +483,13 @@ public class VolumeListActivity extends ListActivity {
 										mVolumeFileSystem, null);
 								mAsyncTaskId = ASYNC_TASK_UNLOCK_PBKDF2;
 								mAsyncTask.setActivity(VolumeListActivity.this);
-                                if(mSelectedVolume.getCustomConfigPath() == null)
-								    mAsyncTask.execute(mSelectedVolume.getPath(),
-								        		value.toString());
-                                else
-								    mAsyncTask.execute(mSelectedVolume.getPath(),
-								        		value.toString(),
-                                                mSelectedVolume.getCustomConfigPath());
+								if(mSelectedVolume.getCustomConfigPath() == null)
+									mAsyncTask.execute(mSelectedVolume.getPath(),
+												value.toString());
+								else
+									mAsyncTask.execute(mSelectedVolume.getPath(),
+												value.toString(),
+												mSelectedVolume.getCustomConfigPath());
 								break;
 							case DIALOG_VOL_CREATEPASS:
 								// Show progress dialog
@@ -499,10 +499,10 @@ public class VolumeListActivity extends ListActivity {
 								// Launch async task to create volume
 								mAsyncTask = new CreateVolumeTask(mProgDialog,
 										mVolumeFileSystem);
-                                mAsyncTaskId = ASYNC_TASK_CREATE;
-                                mAsyncTask.setActivity(VolumeListActivity.this);
-                                mAsyncTask.execute(mVolPickerResult,
-                                        mCreateVolumeName, value.toString());
+								mAsyncTaskId = ASYNC_TASK_CREATE;
+								mAsyncTask.setActivity(VolumeListActivity.this);
+								mAsyncTask.execute(mVolPickerResult,
+										mCreateVolumeName, value.toString());
 								break;
 							}
 						}
@@ -547,10 +547,10 @@ public class VolumeListActivity extends ListActivity {
 							Editable value = input.getText();
 							switch (myId) {
 							case DIALOG_VOL_NAME:
-                                if(mVolConfigResult == null)
+								if(mVolConfigResult == null)
 								importVolume(value.toString(),
 										mVolPickerResult, mVolumeFileSystem);
-                                else
+								else
 								importVolumeWithConfig(value.toString(),
 										mVolPickerResult,mVolConfigResult, mVolumeFileSystem);
 								break;
@@ -797,8 +797,8 @@ public class VolumeListActivity extends ListActivity {
 		mApp.getDbHelper().insertVolume(volume);
 		refreshList();
 	}
-	
-        private void importVolumeWithConfig(String volumeName, String volumePath,
+
+		private void importVolumeWithConfig(String volumeName, String volumePath,
 			String configPath, FileSystem fileSystem) {
 		Volume volume = new Volume(volumeName, volumePath, configPath, fileSystem);
 		mApp.getVolumeList().add(volume);
@@ -926,34 +926,33 @@ public class VolumeListActivity extends ListActivity {
 			}
 
 			// Get file provider for this file system
-                        EncFSFileProvider fileProvider = mFileSystem
-                            .getFileProvider(args[0]);
-                        String providerPrefix=mFileSystem.getPathPrefix();
-                        EncFSConfig volConfig = null;
-                        if(args.length>2)
-                        {
-                            File config = new File(providerPrefix + args[2]);
-                            try {
-                                volConfig = EncFSConfigParser.parseFile(config );
-                            } catch (EncFSInvalidConfigException e1) {
-                                // TODO Auto-generated catch block
-                                e1.printStackTrace();
-                            } 
-                            catch (EncFSUnsupportedException e1) {
-                                // TODO Auto-generated catch block
-                                e1.printStackTrace();
-                            } catch (ParserConfigurationException e1) {
-                                // TODO Auto-generated catch block
-                                e1.printStackTrace();
-                            } catch (SAXException e1) {
-                                // TODO Auto-generated catch block
-                                e1.printStackTrace();
-                            } catch (IOException e1) {
-                                // TODO Auto-generated catch block
-                                e1.printStackTrace();
-                            }
-                        }
-                        //test
+						EncFSFileProvider fileProvider = mFileSystem
+							.getFileProvider(args[0]);
+						String providerPrefix=mFileSystem.getPathPrefix();
+						EncFSConfig volConfig = null;
+						if(args.length>2)
+						{
+							File config = new File(providerPrefix + args[2]);
+							try {
+								volConfig = EncFSConfigParser.parseFile(config );
+							} catch (EncFSInvalidConfigException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							catch (EncFSUnsupportedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (ParserConfigurationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (SAXException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
 			// Unlock the volume, takes long due to PBKDF2 calculation
 			try {
 				if (cachedKey == null) {
@@ -962,7 +961,7 @@ public class VolumeListActivity extends ListActivity {
 							.withFileProvider(fileProvider)
 							.withConfig(volConfig)
 							.withPassword(args[1]).buildVolume();
-				    } else {
+					} else {
 					volume = new EncFSVolumeBuilder()
 							.withFileProvider(fileProvider)
 							.withPbkdf2Provider(mApp.getNativePBKDF2Provider())
