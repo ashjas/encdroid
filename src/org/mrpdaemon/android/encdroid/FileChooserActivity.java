@@ -57,7 +57,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class FileChooserActivity extends ListActivity {
 	// Parameter key for activity mode
@@ -108,9 +107,8 @@ public class FileChooserActivity extends ListActivity {
 	// What mode we're running in
 	private int mMode;
 	
-	private Boolean chooseConfigNext=false;
 	private String configPath;
-	boolean configFileFound = false;
+	private boolean configFileFound = false;
 
 	// Current directory
 	private String mCurrentDir;
@@ -296,14 +294,7 @@ public class FileChooserActivity extends ListActivity {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
-							//launch another filechooser activity for browsing config file.
-							chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
-							showFileListDialog1111("storage/emulated/legacy");
-							/*Toast.makeText(getApplicationContext(),
-									String.format(getString(R.string.browse_config_toast_str),
-									mCurrentDir),
-									Toast.LENGTH_LONG).show();*/
-							//returnResult(mCurrentDir);
+							browseConfigFileDialog(mApp.getFileSystemList().get(0).getPathPrefix());
 						}
 					});
 			// Cancel button
@@ -349,7 +340,6 @@ public class FileChooserActivity extends ListActivity {
 				returnResult(mCurrentDir);
 			else
 				showDialog(DIALOG_BROWSE_CONFIG);
-			item.setVisible(false);
 			return true;
 		case android.R.id.home:
 			Log.v(TAG, "Home icon clicked");
@@ -519,7 +509,7 @@ public class FileChooserActivity extends ListActivity {
 
 		return stringBuilder.toString();
 	}
-	void showFileListDialog1111(final String directory){
+	void browseConfigFileDialog(final String directory){
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -532,10 +522,9 @@ public class FileChooserActivity extends ListActivity {
 
 			//iterate over tempFileList
 			for(int i = 0; i < tempFileList.length; i++){
-				//if(tempFileList[i].getName().equals(EncFSVolume.CONFIG_FILE_NAME) || tempFileList[i].isDirectory())
 				{
 					fileList[i] = tempFileList[i];
-					filenameList[i] = tempFileList[i].getName();
+					filenameList[i]= tempFileList[i].isDirectory()? tempFileList[i].getName()+"/":tempFileList[i].getName();
 				}
 			}
 		} else {
@@ -548,10 +537,9 @@ public class FileChooserActivity extends ListActivity {
 
 			//iterate over tempFileList
 			for(int i = 0; i < tempFileList.length; i++){
-				//if(tempFileList[i].getName().equals(EncFSVolume.CONFIG_FILE_NAME) || tempFileList[i].isDirectory())
 				{
 					fileList[i + 1] = tempFileList[i];
-					filenameList[i + 1] = tempFileList[i].getName();
+					filenameList[i + 1]= tempFileList[i].isDirectory()? tempFileList[i].getName()+"/":tempFileList[i].getName();
 				}
 			}
 		}
@@ -562,7 +550,7 @@ public class FileChooserActivity extends ListActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						File chosenFile = fileList[which];
 						if(chosenFile.isDirectory())
-							showFileListDialog1111(chosenFile.getAbsolutePath());
+							browseConfigFileDialog(chosenFile.getAbsolutePath());
 						else{
 							configPath = chosenFile.getAbsolutePath();
 							intent.putExtra(RESULT_KEY, volumeHomeDir);
@@ -663,7 +651,7 @@ public class FileChooserActivity extends ListActivity {
 			}
 
 			if (result == true) {
-				if (mPrefs.getBoolean("auto_import", true) && !chooseConfigNext) {
+				if (mPrefs.getBoolean("auto_import", true)) {
 					showDialog(DIALOG_AUTO_IMPORT);
 				}
 			}
@@ -695,23 +683,12 @@ public class FileChooserActivity extends ListActivity {
 			mCurrentDir = selected.getPath();
 			launchFillTask();
 		} else {
-				if(!chooseConfigNext)
-				{
 					if (mMode == VOLUME_PICKER_MODE) {
 						returnResult(mCurrentDir);
 					} else if (mMode == FILE_PICKER_MODE) {
 						returnResult(selected.getPath());
 					}
 				}
-				else
-				{
-					Intent intent = this.getIntent();
-					intent.putExtra(RESULT_KEY, volumeHomeDir);
-					intent.putExtra(CONFIG_RESULT_KEY, selected.getPath());
-					setResult(Activity.RESULT_OK, intent);
-					finish();
-				}
-		}
 	}
 
 	/*
