@@ -928,11 +928,10 @@ public class VolumeListActivity extends ListActivity {
 			// Get file provider for this file system
 						EncFSFileProvider fileProvider = mFileSystem
 							.getFileProvider(args[0]);
-						String providerPrefix=mFileSystem.getPathPrefix();
 						EncFSConfig volConfig = null;
 						if(args.length>2)
 						{
-							File config = new File(providerPrefix + args[2]);
+							File config = new File(args[2]);
 							try {
 								volConfig = EncFSConfigParser.parseFile(config );
 							} catch (EncFSInvalidConfigException e1) {

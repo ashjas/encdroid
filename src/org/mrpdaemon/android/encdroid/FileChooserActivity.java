@@ -109,6 +109,7 @@ public class FileChooserActivity extends ListActivity {
 	private int mMode;
 	
 	private Boolean chooseConfigNext=false;
+	private String configPath;
 	boolean configFileFound = false;
 
 	// Current directory
@@ -556,20 +557,27 @@ public class FileChooserActivity extends ListActivity {
 		}
 
 		builder.setTitle("Choose your file: " + directory);
-
+		final Intent intent = this.getIntent();
 		builder.setItems(filenameList, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				File chosenFile = fileList[which];
-
-				if(chosenFile.isDirectory())
-					showFileListDialog1111(chosenFile.getAbsolutePath());
-			}
-		});
+					public void onClick(DialogInterface dialog, int which) {
+						File chosenFile = fileList[which];
+						if(chosenFile.isDirectory())
+							showFileListDialog1111(chosenFile.getAbsolutePath());
+						else{
+							configPath = chosenFile.getAbsolutePath();
+							intent.putExtra(RESULT_KEY, volumeHomeDir);
+							intent.putExtra(CONFIG_RESULT_KEY, configPath);
+							setResult(Activity.RESULT_OK, intent);
+							finish();
+						}
+					}
+				});
 
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				finish();
 				dialog.dismiss();
 			}
 
@@ -702,7 +710,6 @@ public class FileChooserActivity extends ListActivity {
 					intent.putExtra(CONFIG_RESULT_KEY, selected.getPath());
 					setResult(Activity.RESULT_OK, intent);
 					finish();
-
 				}
 		}
 	}
