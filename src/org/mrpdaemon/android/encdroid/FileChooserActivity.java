@@ -18,8 +18,11 @@
 
 package org.mrpdaemon.android.encdroid;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -294,10 +297,11 @@ public class FileChooserActivity extends ListActivity {
 								int whichButton) {
 							//launch another filechooser activity for browsing config file.
 							chooseConfigNext=true;//we dont return result as of now.. will use existing activity for config file as well.
-							Toast.makeText(getApplicationContext(),
+							showFileListDialog1111("storage/emulated/legacy");
+							/*Toast.makeText(getApplicationContext(),
 									String.format(getString(R.string.browse_config_toast_str),
 									mCurrentDir),
-									Toast.LENGTH_LONG).show();
+									Toast.LENGTH_LONG).show();*/
 							//returnResult(mCurrentDir);
 						}
 					});
@@ -482,7 +486,98 @@ public class FileChooserActivity extends ListActivity {
 
 		return configFileFound;
 	}
+	private File[] fileList;
+	private String[] filenameList;
+	private File[] loadFileList(String directory) {
+		File path = new File(directory);
 
+		if(path.exists()) {
+			FilenameFilter filter = new FilenameFilter() {
+				public boolean accept(File dir, String filename) {
+					//add some filters here, for now return true to see all files
+					File file = new File(dir, filename);
+					return filename.contains("encfs") || file.isDirectory();
+					//return true;
+				}
+			};
+
+			//if null return an empty array instead
+			File[] list = path.listFiles(filter);
+			Arrays.sort(list);
+			return list == null? new File[0] : list;
+		} else {
+			return new File[0];
+		}
+	}
+	public String upOneDirectory(String directory){
+		String[] dirs = directory.split("/");
+		StringBuilder stringBuilder = new StringBuilder("");
+
+		for(int i = 0; i < dirs.length-1; i++)
+			stringBuilder.append(dirs[i]).append("/");
+
+		return stringBuilder.toString();
+	}
+	void showFileListDialog1111(final String directory){
+		Dialog dialog = null;
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		File[] tempFileList = loadFileList(directory);
+
+		//if directory is root, no need to up one directory
+		if(directory.equals("/")){
+			fileList = new File[tempFileList.length];
+			filenameList = new String[tempFileList.length];
+
+			//iterate over tempFileList
+			for(int i = 0; i < tempFileList.length; i++){
+				//if(tempFileList[i].getName().equals(EncFSVolume.CONFIG_FILE_NAME) || tempFileList[i].isDirectory())
+				{
+					fileList[i] = tempFileList[i];
+					filenameList[i] = tempFileList[i].getName();
+				}
+			}
+		} else {
+			fileList = new File[tempFileList.length+1];
+			filenameList = new String[tempFileList.length+1];
+
+			//add an "up" option as first item
+			fileList[0] = new File(upOneDirectory(directory));
+			filenameList[0] = "..";
+
+			//iterate over tempFileList
+			for(int i = 0; i < tempFileList.length; i++){
+				//if(tempFileList[i].getName().equals(EncFSVolume.CONFIG_FILE_NAME) || tempFileList[i].isDirectory())
+				{
+					fileList[i + 1] = tempFileList[i];
+					filenameList[i + 1] = tempFileList[i].getName();
+				}
+			}
+		}
+
+		builder.setTitle("Choose your file: " + directory);
+
+		builder.setItems(filenameList, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				File chosenFile = fileList[which];
+
+				if(chosenFile.isDirectory())
+					showFileListDialog1111(chosenFile.getAbsolutePath());
+			}
+		});
+
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+
+
+		});
+		dialog = builder.create();
+		dialog.show();
+	}
 	// Show a progress spinner and launch the fill task
 	private void launchFillTask() {
 		new FileChooserFillTask().execute();
