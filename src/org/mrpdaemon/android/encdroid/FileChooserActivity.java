@@ -109,6 +109,7 @@ public class FileChooserActivity extends ListActivity {
 	
 	private String configPath;
 	private boolean configFileFound = false;
+	private File[] fileList;
 
 	// Current directory
 	private String mCurrentDir;
@@ -477,22 +478,18 @@ public class FileChooserActivity extends ListActivity {
 
 		return configFileFound;
 	}
-	private File[] fileList;
-	private String[] filenameList;
+
 	private File[] loadFileList(String directory) {
 		File path = new File(directory);
 
 		if(path.exists()) {
 			FilenameFilter filter = new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
-					//add some filters here, for now return true to see all files
 					File file = new File(dir, filename);
-					return filename.contains("encfs") || file.isDirectory();
-					//return true;
+					return filename.contains(".xml") || file.isDirectory();//config name not restricted to .encfs6.xml
 				}
 			};
 
-			//if null return an empty array instead
 			File[] list = path.listFiles(filter);
 			Arrays.sort(list);
 			return list == null? new File[0] : list;
@@ -510,45 +507,44 @@ public class FileChooserActivity extends ListActivity {
 		return stringBuilder.toString();
 	}
 	void browseConfigFileDialog(final String directory){
+		String[] filenameList;
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		File[] tempFileList = loadFileList(directory);
-
-		//if directory is root, no need to up one directory
-		if(directory.equals("/")){
+		
+		if(directory.equals(mApp.getFileSystemList().get(0).getPathPrefix())){
 			fileList = new File[tempFileList.length];
 			filenameList = new String[tempFileList.length];
 
-			//iterate over tempFileList
 			for(int i = 0; i < tempFileList.length; i++){
 				{
 					fileList[i] = tempFileList[i];
-					filenameList[i]= tempFileList[i].isDirectory()? tempFileList[i].getName()+"/":tempFileList[i].getName();
+					filenameList[i]=tempFileList[i].getName();
 				}
 			}
 		} else {
 			fileList = new File[tempFileList.length+1];
 			filenameList = new String[tempFileList.length+1];
 
-			//add an "up" option as first item
 			fileList[0] = new File(upOneDirectory(directory));
 			filenameList[0] = "..";
 
-			//iterate over tempFileList
 			for(int i = 0; i < tempFileList.length; i++){
 				{
 					fileList[i + 1] = tempFileList[i];
-					filenameList[i + 1]= tempFileList[i].isDirectory()? tempFileList[i].getName()+"/":tempFileList[i].getName();
+					filenameList[i + 1]= tempFileList[i].getName();
 				}
 			}
 		}
-
-		builder.setTitle("Choose your file: " + directory);
 		final Intent intent = this.getIntent();
-		builder.setItems(filenameList, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						File chosenFile = fileList[which];
+
+		builder.setTitle(getString(R.string.choose_config_dialog_str) + directory);
+		builder.setAdapter(new ConfigFileChooserAdapter(this, R.layout.file_chooser_item,
+						fileList,filenameList),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						File chosenFile = fileList[item];
 						if(chosenFile.isDirectory())
 							browseConfigFileDialog(chosenFile.getAbsolutePath());
 						else{
@@ -562,15 +558,13 @@ public class FileChooserActivity extends ListActivity {
 				});
 
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				finish();
 				dialog.dismiss();
 			}
-
-
 		});
+
 		dialog = builder.create();
 		dialog.show();
 	}
