@@ -10,3 +10,5 @@ proguard-project.txt
 local.properties
 .vimrc
 cscope*
+out
+.idea
