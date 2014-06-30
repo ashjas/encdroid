@@ -33,6 +33,9 @@ import org.mrpdaemon.sec.encfs.EncFSVolume;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -83,6 +86,7 @@ public class FileChooserActivity extends ListActivity {
 	public final static String RESULT_KEY = "result_path";
 	
 	public final static String CONFIG_RESULT_KEY = "config_result_path";
+	public MyAlertDialogFragment frag;
 
 	// Name of the SD card directory for copying files into
 	public final static String ENCDROID_SD_DIR_NAME = "Encdroid";
@@ -110,6 +114,7 @@ public class FileChooserActivity extends ListActivity {
 	private String configPath;
 	private boolean configFileFound = false;
 	private File[] fileList;
+	private boolean dialogShown =false;
 
 	// Current directory
 	private String mCurrentDir;
@@ -162,6 +167,8 @@ public class FileChooserActivity extends ListActivity {
 					savedInstanceState.getInt(FS_INDEX_KEY));
 			mExportFileName = savedInstanceState.getString(EXPORT_FILE_KEY);
 			mCurrentDir = savedInstanceState.getString(CUR_DIR_KEY);
+			if(dialogShown)
+				getFragmentManager().beginTransaction().add(frag,"dialog").commit();
 		}
 
 		mCurFileList = new ArrayList<FileChooserItem>();
@@ -295,7 +302,8 @@ public class FileChooserActivity extends ListActivity {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
-							browseConfigFileDialog(mApp.getFileSystemList().get(0).getPathPrefix());
+							showBrowseDialog(mApp.getFileSystemList().get(0).getPathPrefix());
+							//browseConfigFileDialog(mApp.getFileSystemList().get(0).getPathPrefix());
 						}
 					});
 			// Cancel button
@@ -571,6 +579,126 @@ public class FileChooserActivity extends ListActivity {
 	// Show a progress spinner and launch the fill task
 	private void launchFillTask() {
 		new FileChooserFillTask().execute();
+	}
+
+	public void showBrowseDialog(String dir) {
+		dialogShown=true;
+		frag = new MyAlertDialogFragment();
+		Bundle args = new Bundle();
+
+		args.putString("directory", dir);
+		frag.setArguments(args);
+		//DialogFragment frag = MyAlertDialogFragment.newInstance(dir);
+		frag.show(getFragmentManager(), "dialog");
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		transaction.addToBackStack("dialog");
+		transaction.commit();
+	}
+
+	public void doPositiveClick(int item) {
+		// Do stuff here.
+		Log.i("FragmentAlertDialog", "Positive click!");
+		File chosenFile = fileList[item];
+		if(chosenFile.isDirectory())
+			showBrowseDialog(chosenFile.getAbsolutePath());
+			//browseConfigFileDialog(chosenFile.getAbsolutePath());
+		else{
+			configPath = chosenFile.getAbsolutePath();
+			Intent intent = this.getIntent();
+			intent.putExtra(RESULT_KEY, volumeHomeDir);
+			intent.putExtra(CONFIG_RESULT_KEY, configPath);
+			setResult(Activity.RESULT_OK, intent);
+			finish();
+		}
+	}
+
+	public void doNegativeClick() {
+		// Do stuff here.
+		Log.i("FragmentAlertDialog", "Negative click!");
+		dialogShown=false;
+		finish();
+		//dialog.dismiss();
+	}
+	public  class MyAlertDialogFragment extends DialogFragment {
+
+		/*public  MyAlertDialogFragment newInstance(String directory) {
+			MyAlertDialogFragment frag = new MyAlertDialogFragment();
+			Bundle args = new Bundle();
+
+			args.putString("directory", directory);
+			frag.setArguments(args);
+			return frag;
+		}*/
+		public MyAlertDialogFragment(){super();}
+
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+				super.onCreate(savedInstanceState);
+			setRetainInstance(true);
+		}
+
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+			String dir =getArguments().getString("directory");
+			//AlertDialog.Builder builder =new AlertDialog.Builder(getActivity());
+
+			String[] filenameList;
+			//File[] fileList;
+			//Dialog dialog = null;
+			AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+
+			File[] tempFileList = loadFileList(dir);
+
+			if(dir.equals(mApp.getFileSystemList().get(0).getPathPrefix())){
+				fileList = new File[tempFileList.length];
+				filenameList = new String[tempFileList.length];
+
+				for(int i = 0; i < tempFileList.length; i++){
+					{
+						fileList[i] = tempFileList[i];
+						filenameList[i]=tempFileList[i].getName();
+					}
+				}
+			} else {
+				fileList = new File[tempFileList.length+1];
+				filenameList = new String[tempFileList.length+1];
+
+				fileList[0] = new File(upOneDirectory(dir));
+				filenameList[0] = "..";
+
+				for(int i = 0; i < tempFileList.length; i++){
+					{
+						fileList[i + 1] = tempFileList[i];
+						filenameList[i + 1]= tempFileList[i].getName();
+					}
+				}
+			}
+			//final Intent intent = this.getActivity().getIntent();
+
+
+			builder1.setTitle(getString(R.string.choose_config_dialog_str) + dir);
+			builder1.setAdapter(new ConfigFileChooserAdapter(getActivity(), R.layout.file_chooser_item,
+							fileList,filenameList),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int item) {
+							doPositiveClick(item);
+
+						}
+					});
+			builder1.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					doNegativeClick();
+
+				}
+			});
+			return builder1.create();
+		}
+		@Override
+		public void onSaveInstanceState(Bundle outState) {
+			super.onSaveInstanceState(outState);
+		}
 	}
 
 	/*
