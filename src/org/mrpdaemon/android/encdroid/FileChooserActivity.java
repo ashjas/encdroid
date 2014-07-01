@@ -87,12 +87,15 @@ public class FileChooserActivity extends ListActivity {
 	
 	public final static String CONFIG_RESULT_KEY = "config_result_path";
 	public MyAlertDialogFragment frag;
+	public final static String DIALOG_SHOWN_KEY = "dialog_shown";
+	public final static String DIALOG_SHOWN_DIR_KEY = "dialog_shown_dir";
 
 	// Name of the SD card directory for copying files into
 	public final static String ENCDROID_SD_DIR_NAME = "Encdroid";
 
 	// Instance state bundle key for current directory
 	public final static String CUR_DIR_KEY = "current_dir";
+	public final static String VOL_HOME_DIR_KEY = "volume_home_dir";
 
 	// Logger tag
 	private static final String TAG = "FileChooserActivity";
@@ -115,6 +118,7 @@ public class FileChooserActivity extends ListActivity {
 	private boolean configFileFound = false;
 	private File[] fileList;
 	private boolean dialogShown =false;
+	private String dialogShownDir;
 
 	// Current directory
 	private String mCurrentDir;
@@ -167,8 +171,14 @@ public class FileChooserActivity extends ListActivity {
 					savedInstanceState.getInt(FS_INDEX_KEY));
 			mExportFileName = savedInstanceState.getString(EXPORT_FILE_KEY);
 			mCurrentDir = savedInstanceState.getString(CUR_DIR_KEY);
-			if(dialogShown)
-				getFragmentManager().beginTransaction().add(frag,"dialog").commit();
+			volumeHomeDir = savedInstanceState.getString(VOL_HOME_DIR_KEY);
+			dialogShown = savedInstanceState.getBoolean("dialog_shown");
+			dialogShownDir = savedInstanceState.getString("dialog_shown_dir");
+			if(dialogShown) {
+				//showBrowseDialog(mApp.getFileSystemList().get(0).getPathPrefix());
+				showBrowseDialog(dialogShownDir);
+				//getFragmentManager().beginTransaction().add(frag,"dialog").commit();
+			}
 		}
 
 		mCurFileList = new ArrayList<FileChooserItem>();
@@ -219,6 +229,9 @@ public class FileChooserActivity extends ListActivity {
 		outState.putInt(FS_INDEX_KEY, mApp.getFSIndex(mFileSystem));
 		outState.putString(EXPORT_FILE_KEY, mExportFileName);
 		outState.putString(CUR_DIR_KEY, mCurrentDir);
+		outState.putBoolean(DIALOG_SHOWN_KEY, dialogShown);
+		outState.putString(DIALOG_SHOWN_DIR_KEY, dialogShownDir);
+		outState.putString(VOL_HOME_DIR_KEY, volumeHomeDir);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -583,6 +596,7 @@ public class FileChooserActivity extends ListActivity {
 
 	public void showBrowseDialog(String dir) {
 		dialogShown=true;
+		dialogShownDir=dir;
 		frag = new MyAlertDialogFragment();
 		Bundle args = new Bundle();
 
@@ -620,7 +634,7 @@ public class FileChooserActivity extends ListActivity {
 		//dialog.dismiss();
 	}
 	public  class MyAlertDialogFragment extends DialogFragment {
-
+		String cur_dir;
 		/*public  MyAlertDialogFragment newInstance(String directory) {
 			MyAlertDialogFragment frag = new MyAlertDialogFragment();
 			Bundle args = new Bundle();
@@ -641,6 +655,7 @@ public class FileChooserActivity extends ListActivity {
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 			String dir =getArguments().getString("directory");
+			cur_dir=dir;
 			//AlertDialog.Builder builder =new AlertDialog.Builder(getActivity());
 
 			String[] filenameList;
