@@ -572,6 +572,11 @@ public class FileChooserActivity extends ListActivity {
 		}
 
 		@Override
+		public void onCancel (DialogInterface dialog) {
+			isDialogShown=false;
+		}
+		
+		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 			String dir =getArguments().getString("directory");
